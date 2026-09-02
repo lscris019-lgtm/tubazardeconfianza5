@@ -769,6 +769,18 @@ document.addEventListener("DOMContentLoaded", () => {
             document.head.appendChild(script);
         });
 
+        // SweetAlert2 debe quedar por encima del modal de compartir.
+        if (!document.getElementById("estilosSweetAlertAdmin")) {
+            const estilosSweetAlert = document.createElement("style");
+            estilosSweetAlert.id = "estilosSweetAlertAdmin";
+            estilosSweetAlert.textContent = `
+                .swal2-container-admin {
+                    z-index: 100000 !important;
+                }
+            `;
+            document.head.appendChild(estilosSweetAlert);
+        }
+
         const mostrarSweetAlert = async (icon, title, text) => {
             try {
                 const Swal = await cargarSweetAlert();
@@ -777,7 +789,10 @@ document.addEventListener("DOMContentLoaded", () => {
                     title,
                     text,
                     confirmButtonText: "Aceptar",
-                    confirmButtonColor: "#198754"
+                    confirmButtonColor: "#198754",
+                    customClass: {
+                        container: "swal2-container-admin"
+                    }
                 });
             } catch (error) {
                 console.error("No se pudo cargar SweetAlert2:", error);
