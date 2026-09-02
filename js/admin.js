@@ -805,8 +805,10 @@ document.addEventListener("DOMContentLoaded", () => {
                             "La categoría, descripción y precio se copiaron al portapapeles. Ahora puedes abrir WhatsApp y adjuntar la foto."
                         );
                     } catch (error) {
-                        alert(
-                            "No se pudo abrir el compartir automático. Usa “Copiar información” y después adjunta la foto."
+                        await mostrarSweetAlert(
+                            "warning",
+                            "No se pudo compartir automáticamente",
+                            "Usa “Copiar categoría, descripción y precio” y después adjunta la foto."
                         );
                     }
                 }
@@ -818,7 +820,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 try {
                     await navigator.clipboard.writeText(textoCompartir);
-                    alert("Se copió la categoría, descripción y precio al portapapeles.");
+                    await mostrarSweetAlert(
+                        "success",
+                        "¡Información copiada!",
+                        "La categoría, descripción y precio se copiaron al portapapeles."
+                    );
                 } catch (error) {
                     mostrarSweetAlert(
                         "error",
