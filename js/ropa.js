@@ -629,73 +629,136 @@ document.addEventListener("DOMContentLoaded", () => {
        modal de descripción)
     ========================================== */
 
-    
-function mostrarOpcionesPrenda(imagenURL) {
+    function insertarEstilosModalPrenda() {
 
-    const modalAnterior = document.getElementById("modalOpcionesPrenda");
-    if (modalAnterior) {
-        modalAnterior.remove();
+        if (document.getElementById("estilosModalOpcionesPrenda")) return;
+
+        const estilo = document.createElement("style");
+        estilo.id = "estilosModalOpcionesPrenda";
+        estilo.textContent = `
+            #modalOpcionesPrenda .modal-opciones-overlay {
+                position: fixed;
+                inset: 0;
+                z-index: 99999;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+                background: rgba(0,0,0,.6);
+            }
+            #modalOpcionesPrenda .modal-opciones-contenido {
+                position: relative;
+                width: min(500px, 100%);
+                max-height: 90vh;
+                overflow-y: auto;
+                padding: 28px;
+                border-radius: 18px;
+                background: #fff;
+                box-shadow: 0 20px 60px rgba(0,0,0,.3);
+                text-align: center;
+            }
+            #modalOpcionesPrenda h3 { margin: 0 0 12px; font-size: 25px; }
+            #modalOpcionesPrenda p { margin: 8px 0; line-height: 1.5; }
+            #modalOpcionesPrenda .modal-opciones-aviso {
+                margin: 18px 0;
+                padding: 12px;
+                border-radius: 10px;
+                background: #f3f3f3;
+            }
+            #modalOpcionesPrenda .modal-opciones-botones {
+                display: grid;
+                gap: 10px;
+                margin-top: 20px;
+            }
+            #modalOpcionesPrenda .modal-opciones-botones button {
+                width: 100%;
+                padding: 13px 16px;
+                border: 0;
+                border-radius: 10px;
+                cursor: pointer;
+                font-size: 15px;
+                font-weight: 600;
+            }
+            #modalOpcionesPrenda .opcion-grupo,
+            #modalOpcionesPrenda .opcion-compartir {
+                background: #25d366;
+                color: #fff;
+            }
+            #modalOpcionesPrenda .opcion-copiar,
+            #modalOpcionesPrenda .opcion-foto {
+                background: #eee;
+                color: #222;
+            }
+            #modalOpcionesPrenda .opcion-cerrar {
+                background: transparent;
+                color: #555;
+            }
+            #modalOpcionesPrenda .modal-opciones-cerrar {
+                position: absolute;
+                top: 8px;
+                right: 12px;
+                width: 38px !important;
+                height: 38px;
+                padding: 0 !important;
+                border: 0;
+                background: transparent;
+                color: #555;
+                font-size: 28px !important;
+                cursor: pointer;
+            }
+        `;
+        document.head.appendChild(estilo);
     }
 
-    const modal = document.createElement("div");
-    modal.id = "modalOpcionesPrenda";
 
-    modal.innerHTML = `
-        <div class="modal-opciones-overlay">
-            <div class="modal-opciones-contenido" role="dialog" aria-modal="true">
-                <button type="button" class="modal-opciones-cerrar" id="cerrarOpcionesPrenda" aria-label="Cerrar">×</button>
+    function mostrarOpcionesPrenda(imagenURL) {
 
-                <h3>¡Prenda seleccionada!</h3>
+        insertarEstilosModalPrenda();
 
-                <p>
-                    Ahora comparte la foto de esta prenda con el mensaje
-                    <strong>“Yo”</strong>.
-                </p>
+        const modalAnterior = document.getElementById("modalOpcionesPrenda");
+        if (modalAnterior) modalAnterior.remove();
 
-                <p class="modal-opciones-aviso">
-                    Si eres nueva: primero ingresa al grupo de WhatsApp, regresa a esta página
-                    y después selecciona <strong>Compartir foto + “Yo”</strong>.
-                </p>
+        const modal = document.createElement("div");
+        modal.id = "modalOpcionesPrenda";
 
-                <div class="modal-opciones-botones">
-
-                    <button type="button" id="btnIngresarGrupo" class="opcion-grupo">
-                        Soy nueva, ingresar al grupo y regresar
-                    </button>
-
-                    <button type="button" id="btnCompartirPrenda" class="opcion-compartir">
-                        Compartir foto + “Yo”
-                    </button>
-
-                    <button type="button" id="btnCopiarYo" class="opcion-copiar">
-                        Copiar “Yo”
-                    </button>
-
-                    <button type="button" id="btnAbrirFoto" class="opcion-foto">
-                        Abrir foto de la prenda
-                    </button>
-
-                    <button type="button" id="btnCerrarOpciones" class="opcion-cerrar">
-                        Cerrar
-                    </button>
-
+        modal.innerHTML = `
+            <div class="modal-opciones-overlay">
+                <div class="modal-opciones-contenido" role="dialog" aria-modal="true">
+                    <button type="button" class="modal-opciones-cerrar" id="cerrarOpcionesPrenda" aria-label="Cerrar">×</button>
+                    <h3>¡Prenda seleccionada!</h3>
+                    <p>Ahora comparte la foto de esta prenda con el mensaje <strong>“Yo”</strong>.</p>
+                    <p class="modal-opciones-aviso">
+                        Si eres nueva: primero ingresa al grupo de WhatsApp, regresa a esta página
+                        y después selecciona <strong>Compartir foto + “Yo”</strong>.
+                    </p>
+                    <div class="modal-opciones-botones">
+                        <button type="button" id="btnIngresarGrupo" class="opcion-grupo">
+                            🟢 Soy nueva, ingresar al grupo y regresar
+                        </button>
+                        <button type="button" id="btnCompartirPrenda" class="opcion-compartir">
+                            📤 Compartir foto + “Yo”
+                        </button>
+                        <button type="button" id="btnCopiarYo" class="opcion-copiar">
+                            📋 Copiar “Yo”
+                        </button>
+                        <button type="button" id="btnAbrirFoto" class="opcion-foto">
+                            🖼️ Abrir foto de la prenda
+                        </button>
+                        <button type="button" id="btnCerrarOpciones" class="opcion-cerrar">
+                            Cerrar
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
-    `;
+        `;
 
-    document.body.appendChild(modal);
+        document.body.appendChild(modal);
 
-    const cerrar = () => modal.remove();
+        const cerrar = () => modal.remove();
+        modal.querySelector("#cerrarOpcionesPrenda").addEventListener("click", cerrar);
+        modal.querySelector("#btnCerrarOpciones").addEventListener("click", cerrar);
 
-    document.getElementById("cerrarOpcionesPrenda")
-        .addEventListener("click", cerrar);
-
-    document.getElementById("btnCerrarOpciones")
-        .addEventListener("click", cerrar);
-
-    document.getElementById("btnIngresarGrupo")
-        .addEventListener("click", () => {
+        modal.querySelector("#btnIngresarGrupo").addEventListener("click", () => {
             window.open(
                 "https://chat.whatsapp.com/L27TM6CVe0R6IFYzoIs9O5?s=cl&p=a&mlu=4&ilr=4",
                 "_blank",
@@ -703,40 +766,38 @@ function mostrarOpcionesPrenda(imagenURL) {
             );
         });
 
-    document.getElementById("btnCompartirPrenda")
-        .addEventListener("click", async () => {
-
+        modal.querySelector("#btnCompartirPrenda").addEventListener("click", async () => {
             const compartido = await compartirPrendaPorWhatsapp(imagenURL);
-
             if (!compartido) {
-                try {
-                    await navigator.clipboard.writeText("Yo");
+                const copiado = await copiarTexto("Yo");
+                if (copiado) {
                     alert("Se copió “Yo”. Ahora abre WhatsApp y adjunta la foto de la prenda.");
-                } catch (error) {
+                } else {
                     alert("No se pudo abrir el compartir automático. Usa “Copiar Yo” y después adjunta la foto.");
                 }
             }
         });
 
-    document.getElementById("btnCopiarYo")
-        .addEventListener("click", async () => {
-            try {
-                await navigator.clipboard.writeText("Yo");
+        modal.querySelector("#btnCopiarYo").addEventListener("click", async () => {
+            const copiado = await copiarTexto("Yo");
+            if (copiado) {
                 mostrarAvisoCopiado();
-            } catch (error) {
-                alert("No se pudo copiar automáticamente. Selecciona y copia el texto “Yo”.");
+            } else {
+                alert("No se pudo copiar automáticamente. Escribe “Yo” en WhatsApp.");
             }
         });
 
-    document.getElementById("btnAbrirFoto")
-        .addEventListener("click", () => {
-            if (imagenURL) {
-                window.open(imagenURL, "_blank", "noopener");
-            }
+        modal.querySelector("#btnAbrirFoto").addEventListener("click", () => {
+            if (imagenURL) window.open(imagenURL, "_blank", "noopener");
         });
-}
 
-function crearBotonWhatsapp(producto, esOverlay = false) {
+        modal.querySelector(".modal-opciones-overlay").addEventListener("click", (evento) => {
+            if (evento.target.classList.contains("modal-opciones-overlay")) cerrar();
+        });
+    }
+
+
+    function crearBotonWhatsapp(producto, esOverlay = false) {
 
         const whatsapp = document.createElement("a");
 
@@ -750,131 +811,21 @@ function crearBotonWhatsapp(producto, esOverlay = false) {
             ? `${window.location.origin}/.netlify/functions/imagen?key=${encodeURIComponent(producto.foto)}`
             : "";
 
-        const linkGrupo =
-            "https://chat.whatsapp.com/L27TM6CVe0R6IFYzoIs9O5?s=cl&p=a&mlu=4&ilr=4";
-
-        whatsapp.addEventListener(
-            "click",
-            (evento) => {
-
-                evento.preventDefault();
-
-                /*
-                 * No abrimos WhatsApp automáticamente.
-                 * Primero mostramos las opciones para que el usuario
-                 * decida qué quiere hacer.
-                 */
-                mostrarOpcionesPrenda(imagenURL);
-
-            }
-        );
-
+        whatsapp.addEventListener("click", (evento) => {
+            evento.preventDefault();
+            mostrarOpcionesPrenda(imagenURL);
+        });
 
         whatsapp.innerHTML = `<i class="bi bi-whatsapp"></i> YO`;
 
         return whatsapp;
-    }
 
-
-    /* ==========================================
-       OPCIONES PARA PUBLICAR LA PRENDA
-       Se muestra después de abrir el grupo.
-    ========================================== */
-    function mostrarOpcionesWhatsapp(imagenURL) {
-
-        const anterior = document.getElementById("modalOpcionesWhatsapp");
-        if (anterior) anterior.remove();
-
-        const modal = document.createElement("div");
-        modal.id = "modalOpcionesWhatsapp";
-        modal.style.cssText = `
-            position: fixed;
-            inset: 0;
-            z-index: 99999;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(0,0,0,.55);
-            padding: 20px;
-        `;
-
-        modal.innerHTML = `
-            <div style="background:#fff;max-width:430px;width:100%;border-radius:18px;padding:24px;box-shadow:0 15px 45px rgba(0,0,0,.25);text-align:center;">
-                <h3 style="margin:0 0 10px;">¡Prenda seleccionada!</h3>
-                <p style="margin:0 0 20px;line-height:1.5;">
-                    El grupo de WhatsApp ya se abrió. Ahora comparte la foto de esta prenda con el mensaje <strong>“Yo”</strong>.
-                </p>
-                <button id="btnCompartirPrenda" type="button" style="width:100%;padding:12px 16px;border:0;border-radius:10px;background:#25D366;color:#fff;font-weight:700;cursor:pointer;margin-bottom:10px;">
-                    Compartir foto + “Yo”
-                </button>
-                <button id="btnCopiarYo" type="button" style="width:100%;padding:12px 16px;border:1px solid #ddd;border-radius:10px;background:#f7f7f7;font-weight:700;cursor:pointer;margin-bottom:10px;">
-                    Copiar “Yo”
-                </button>
-                <button id="btnAbrirFoto" type="button" style="width:100%;padding:12px 16px;border:1px solid #ddd;border-radius:10px;background:#f7f7f7;font-weight:700;cursor:pointer;">
-                    Abrir foto de la prenda
-                </button>
-                <button id="btnCerrarOpciones" type="button" style="margin-top:16px;border:0;background:none;color:#777;cursor:pointer;">Cerrar</button>
-            </div>
-        `;
-
-        document.body.appendChild(modal);
-
-        modal.querySelector("#btnCompartirPrenda").addEventListener("click", async () => {
-            const ok = await compartirPrendaPorWhatsapp(imagenURL);
-            if (!ok) {
-                mostrarAvisoCopiado("Tu navegador no permite compartir la foto directamente. Usa “Copiar Yo” y “Abrir foto”.");
-            }
-        });
-
-        modal.querySelector("#btnCopiarYo").addEventListener("click", async () => {
-            const ok = await copiarTexto("Yo");
-            mostrarAvisoCopiado(ok ? "Se copió “Yo”. Ya puedes pegarlo en el grupo de WhatsApp." : "No se pudo copiar automáticamente. Escribe “Yo” en WhatsApp.");
-        });
-
-        modal.querySelector("#btnAbrirFoto").addEventListener("click", () => {
-            if (imagenURL) window.open(imagenURL, "_blank", "noopener");
-        });
-
-        modal.querySelector("#btnCerrarOpciones").addEventListener("click", () => modal.remove());
-        modal.addEventListener("click", (e) => {
-            if (e.target === modal) modal.remove();
-        });
-    }
-
-
-    async function copiarTexto(texto) {
-        try {
-            if (navigator.clipboard && window.isSecureContext) {
-                await navigator.clipboard.writeText(texto);
-                return true;
-            }
-        } catch (e) {}
-
-        try {
-            const area = document.createElement("textarea");
-            area.value = texto;
-            area.style.position = "fixed";
-            area.style.left = "-9999px";
-            document.body.appendChild(area);
-            area.focus();
-            area.select();
-            const ok = document.execCommand("copy");
-            area.remove();
-            return ok;
-        } catch (e) {
-            return false;
-        }
     }
 
 
     /* ==========================================
        COMPARTIR LA PRENDA (IMAGEN + "YO") POR
        WHATSAPP USANDO EL PANEL NATIVO DE COMPARTIR
-
-       Devuelve true si se logró abrir el panel de
-       compartir (o si la clienta lo canceló), y
-       false si el navegador no lo soporta, para
-       que se use el plan B (copiar y abrir el link).
     ========================================== */
 
     async function compartirPrendaPorWhatsapp(imagenURL) {
@@ -1171,91 +1122,3 @@ function crearBotonWhatsapp(producto, esOverlay = false) {
     cargarProductos();
 
 });
-<style id="estilosModalOpcionesPrenda">
-#modalOpcionesPrenda .modal-opciones-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 99999;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    background: rgba(0,0,0,.6);
-}
-
-#modalOpcionesPrenda .modal-opciones-contenido {
-    position: relative;
-    width: min(500px, 100%);
-    max-height: 90vh;
-    overflow-y: auto;
-    padding: 28px;
-    border-radius: 18px;
-    background: #fff;
-    box-shadow: 0 20px 60px rgba(0,0,0,.3);
-    text-align: center;
-}
-
-#modalOpcionesPrenda h3 {
-    margin: 0 0 12px;
-    font-size: 25px;
-}
-
-#modalOpcionesPrenda p {
-    margin: 8px 0;
-    line-height: 1.5;
-}
-
-#modalOpcionesPrenda .modal-opciones-aviso {
-    margin: 18px 0;
-    padding: 12px;
-    border-radius: 10px;
-    background: #f3f3f3;
-}
-
-#modalOpcionesPrenda .modal-opciones-botones {
-    display: grid;
-    gap: 10px;
-    margin-top: 20px;
-}
-
-#modalOpcionesPrenda .modal-opciones-botones button {
-    width: 100%;
-    padding: 13px 16px;
-    border: 0;
-    border-radius: 10px;
-    cursor: pointer;
-    font-size: 15px;
-    font-weight: 600;
-}
-
-#modalOpcionesPrenda .opcion-grupo,
-#modalOpcionesPrenda .opcion-compartir {
-    background: #25d366;
-    color: #fff;
-}
-
-#modalOpcionesPrenda .opcion-copiar,
-#modalOpcionesPrenda .opcion-foto {
-    background: #eee;
-    color: #222;
-}
-
-#modalOpcionesPrenda .opcion-cerrar {
-    background: transparent;
-    color: #555;
-}
-
-#modalOpcionesPrenda .modal-opciones-cerrar {
-    position: absolute;
-    top: 8px;
-    right: 12px;
-    width: 38px !important;
-    height: 38px;
-    padding: 0 !important;
-    border: 0;
-    background: transparent;
-    color: #555;
-    font-size: 28px !important;
-    cursor: pointer;
-}
-</style>
