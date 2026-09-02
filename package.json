@@ -1,0 +1,10 @@
+{
+  "name": "tubazardeconfianza",
+  "private": true,
+  "type": "module",
+  "description": "Boutique de ropa de segunda mano - Tu Bazar de Confianza",
+  "dependencies": {
+    "@netlify/blobs": "^11.0.2",
+    "@netlify/database": "^2.0.0"
+  }
+}
