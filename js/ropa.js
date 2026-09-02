@@ -631,117 +631,126 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function crearBotonWhatsapp(producto, esOverlay = false) {
 
-        const whatsapp =
-            document.createElement("a");
+        const whatsapp = document.createElement("a");
 
-        whatsapp.className =
-            esOverlay
-                ? "btn-whatsapp btn-whatsapp-overlay"
-                : "btn-whatsapp";
+        whatsapp.className = esOverlay
+            ? "btn-whatsapp btn-whatsapp-overlay"
+            : "btn-whatsapp";
 
-        whatsapp.target = "_blank";
+        whatsapp.href = "#";
 
-        whatsapp.rel = "noopener";
-
-
-        const imagenURL =
-            producto.foto
-                ? `${window.location.origin}/.netlify/functions/imagen?key=${encodeURIComponent(producto.foto)}`
-                : "";
-
-
-        /*
-         * Enlace al grupo de WhatsApp.
-         *
-         * WhatsApp no permite prellenar un mensaje ni una
-         * foto en un link de invitación a grupo, así que
-         * primero intentamos compartir directamente la
-         * imagen de la prenda seleccionada junto con el
-         * texto "Yo" usando el panel nativo de compartir
-         * del celular (Web Share API). Ahí la clienta solo
-         * elige el grupo de WhatsApp y envía. Si el
-         * dispositivo no soporta compartir archivos (por
-         * ejemplo, en computadora), caemos al plan B: se
-         * copia "Yo" al portapapeles, se abre la foto en
-         * una pestaña para guardarla y se abre el grupo
-         * para que la clienta pegue el texto y adjunte la
-         * imagen manualmente.
-         */
+        const imagenURL = producto.foto
+            ? `${window.location.origin}/.netlify/functions/imagen?key=${encodeURIComponent(producto.foto)}`
+            : "";
 
         const linkGrupo =
-            "https://chat.whatsapp.com/L27TM6CVe0R6IFYzoIs9O5";
+            "https://chat.whatsapp.com/L27TM6CVe0R6IFYzoIs9O5?s=cl&p=a&mlu=4&ilr=4";
 
+        whatsapp.addEventListener("click", async (evento) => {
+            evento.preventDefault();
 
-        whatsapp.href =
-            linkGrupo;
+            // Abrimos primero el grupo. Si la persona es nueva, WhatsApp
+            // le mostrará la opción de unirse; si ya pertenece, abrirá el grupo.
+            window.open(linkGrupo, "_blank", "noopener");
 
+            // Mostramos inmediatamente las opciones para compartir la prenda.
+            mostrarOpcionesWhatsapp(imagenURL);
+        });
 
-        whatsapp.addEventListener(
-            "click",
-            async (evento) => {
-
-                evento.preventDefault();
-
-                /*
-                 * Abrimos primero el enlace de invitación.
-                 * Si la persona ya está dentro, WhatsApp la llevará
-                 * al grupo; si es nueva, podrá unirse.
-                 */
-                const ventanaGrupo = window.open(
-                    linkGrupo,
-                    "_blank",
-                    "noopener"
-                );
-
-                /*
-                 * En dispositivos compatibles, abrimos inmediatamente
-                 * el selector nativo para compartir la FOTO + "Yo".
-                 * WhatsApp no permite elegir automáticamente un grupo
-                 * de invitación ni pulsar Enviar por la página.
-                 */
-                const compartidoDirecto =
-                    await compartirPrendaPorWhatsapp(imagenURL);
-
-                if (compartidoDirecto) {
-                    mostrarAvisoCopiado();
-                    return;
-                }
-
-                /* Plan B para navegadores que no soportan Web Share */
-                try {
-                    await navigator.clipboard.writeText("Yo");
-                } catch (error) {
-                    console.error("No se pudo copiar el mensaje:", error);
-                }
-
-                if (imagenURL) {
-                    window.open(
-                        imagenURL,
-                        "_blank",
-                        "noopener"
-                    );
-                }
-
-                /* Si el navegador bloqueó la primera ventana, reintentamos. */
-                if (!ventanaGrupo || ventanaGrupo.closed) {
-                    window.open(
-                        linkGrupo,
-                        "_blank",
-                        "noopener"
-                    );
-                }
-
-                mostrarAvisoCopiado();
-
-            }
-        );
-
-        whatsapp.innerHTML =
-            `<i class="bi bi-whatsapp"></i> YO`;
-
+        whatsapp.innerHTML = `<i class="bi bi-whatsapp"></i> YO`;
 
         return whatsapp;
+    }
 
+
+    /* ==========================================
+       OPCIONES PARA PUBLICAR LA PRENDA
+       Se muestra después de abrir el grupo.
+    ========================================== */
+    function mostrarOpcionesWhatsapp(imagenURL) {
+
+        const anterior = document.getElementById("modalOpcionesWhatsapp");
+        if (anterior) anterior.remove();
+
+        const modal = document.createElement("div");
+        modal.id = "modalOpcionesWhatsapp";
+        modal.style.cssText = `
+            position: fixed;
+            inset: 0;
+            z-index: 99999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,.55);
+            padding: 20px;
+        `;
+
+        modal.innerHTML = `
+            <div style="background:#fff;max-width:430px;width:100%;border-radius:18px;padding:24px;box-shadow:0 15px 45px rgba(0,0,0,.25);text-align:center;">
+                <h3 style="margin:0 0 10px;">¡Prenda seleccionada!</h3>
+                <p style="margin:0 0 20px;line-height:1.5;">
+                    El grupo de WhatsApp ya se abrió. Ahora comparte la foto de esta prenda con el mensaje <strong>“Yo”</strong>.
+                </p>
+                <button id="btnCompartirPrenda" type="button" style="width:100%;padding:12px 16px;border:0;border-radius:10px;background:#25D366;color:#fff;font-weight:700;cursor:pointer;margin-bottom:10px;">
+                    Compartir foto + “Yo”
+                </button>
+                <button id="btnCopiarYo" type="button" style="width:100%;padding:12px 16px;border:1px solid #ddd;border-radius:10px;background:#f7f7f7;font-weight:700;cursor:pointer;margin-bottom:10px;">
+                    Copiar “Yo”
+                </button>
+                <button id="btnAbrirFoto" type="button" style="width:100%;padding:12px 16px;border:1px solid #ddd;border-radius:10px;background:#f7f7f7;font-weight:700;cursor:pointer;">
+                    Abrir foto de la prenda
+                </button>
+                <button id="btnCerrarOpciones" type="button" style="margin-top:16px;border:0;background:none;color:#777;cursor:pointer;">Cerrar</button>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        modal.querySelector("#btnCompartirPrenda").addEventListener("click", async () => {
+            const ok = await compartirPrendaPorWhatsapp(imagenURL);
+            if (!ok) {
+                mostrarAvisoCopiado("Tu navegador no permite compartir la foto directamente. Usa “Copiar Yo” y “Abrir foto”.");
+            }
+        });
+
+        modal.querySelector("#btnCopiarYo").addEventListener("click", async () => {
+            const ok = await copiarTexto("Yo");
+            mostrarAvisoCopiado(ok ? "Se copió “Yo”. Ya puedes pegarlo en el grupo de WhatsApp." : "No se pudo copiar automáticamente. Escribe “Yo” en WhatsApp.");
+        });
+
+        modal.querySelector("#btnAbrirFoto").addEventListener("click", () => {
+            if (imagenURL) window.open(imagenURL, "_blank", "noopener");
+        });
+
+        modal.querySelector("#btnCerrarOpciones").addEventListener("click", () => modal.remove());
+        modal.addEventListener("click", (e) => {
+            if (e.target === modal) modal.remove();
+        });
+    }
+
+
+    async function copiarTexto(texto) {
+        try {
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(texto);
+                return true;
+            }
+        } catch (e) {}
+
+        try {
+            const area = document.createElement("textarea");
+            area.value = texto;
+            area.style.position = "fixed";
+            area.style.left = "-9999px";
+            document.body.appendChild(area);
+            area.focus();
+            area.select();
+            const ok = document.execCommand("copy");
+            area.remove();
+            return ok;
+        } catch (e) {
+            return false;
+        }
     }
 
 
