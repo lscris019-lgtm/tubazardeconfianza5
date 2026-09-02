@@ -17,10 +17,10 @@ body {
    NAVBAR
 ========================================= */
 
-.navbar-dashboard {
+.navbar-admin {
     background: white;
 
-    padding: 15px 0;
+    padding: 14px 0;
 
     box-shadow:
         0 3px 20px rgba(100, 30, 65, 0.08);
@@ -33,11 +33,11 @@ body {
 
     font-weight: 600;
 
+    line-height: 0.85;
+
     color: #c52f76;
 
     text-decoration: none;
-
-    line-height: 0.85;
 }
 
 .navbar-brand span {
@@ -50,29 +50,18 @@ body {
     color: #704258;
 }
 
-.navbar-links {
-    display: flex;
-
-    gap: 20px;
-}
-
-.navbar-links a {
+.navbar-admin .nav-link {
     color: #654252;
-
-    text-decoration: none;
-
-    font-size: 0.9rem;
 
     font-weight: 500;
 
-    transition: 0.3s;
+    margin-left: 15px;
 }
 
-.navbar-links a:hover,
-.navbar-links a.activo {
+.navbar-admin .nav-link:hover,
+.navbar-admin .nav-link.active {
     color: #d63384;
 }
-
 
 /* =========================================
    MAIN
@@ -466,18 +455,8 @@ body {
 
 @media (max-width: 768px) {
 
-    .navbar-dashboard .container {
-        flex-direction: column;
-
-        gap: 15px;
-    }
-
-    .navbar-links {
-        flex-wrap: wrap;
-
-        justify-content: center;
-
-        gap: 12px;
+    .navbar-admin .nav-link {
+        margin-left: 0;
     }
 
     .dashboard-main {
@@ -491,12 +470,6 @@ body {
 }
 
 @media (max-width: 480px) {
-
-    .navbar-links {
-        flex-direction: column;
-
-        align-items: center;
-    }
 
     .dashboard-header h1 {
         font-size: 3rem;
