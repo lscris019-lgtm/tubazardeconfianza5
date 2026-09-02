@@ -682,13 +682,43 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 evento.preventDefault();
 
+                /*
+                 * El grupo se abre SIEMPRE primero.
+                 * Esto permite que una persona nueva pueda:
+                 * - abrir WhatsApp aunque no lo tuviera abierto;
+                 * - iniciar sesión en WhatsApp Web si es necesario;
+                 * - ver la invitación y unirse al grupo si todavía no pertenece.
+                 *
+                 * Se abre inmediatamente porque los navegadores pueden
+                 * bloquear ventanas creadas después de un await().
+                 */
+                const ventanaGrupo =
+                    window.open(
+                        linkGrupo,
+                        "_blank",
+                        "noopener"
+                    );
+
+                /*
+                 * Después intentamos compartir la imagen + "Yo"
+                 * mediante el panel nativo del dispositivo.
+                 */
                 const compartidoDirecto =
                     await compartirPrendaPorWhatsapp(
                         imagenURL
                     );
 
-                if (compartidoDirecto) return;
+                if (compartidoDirecto) {
+                    mostrarAvisoCopiado();
+                    return;
+                }
 
+                /*
+                 * Si el navegador no permite compartir directamente:
+                 * 1. Copiamos "Yo".
+                 * 2. Abrimos la imagen para guardarla.
+                 * 3. El grupo ya quedó abierto.
+                 */
                 try {
 
                     await navigator.clipboard.writeText(
@@ -714,11 +744,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 }
 
-                window.open(
-                    linkGrupo,
-                    "_blank",
-                    "noopener"
-                );
+                /*
+                 * Si el navegador bloqueó la primera ventana,
+                 * intentamos abrir el grupo nuevamente.
+                 */
+                if (!ventanaGrupo || ventanaGrupo.closed) {
+
+                    window.open(
+                        linkGrupo,
+                        "_blank",
+                        "noopener"
+                    );
+
+                }
 
                 mostrarAvisoCopiado();
 
