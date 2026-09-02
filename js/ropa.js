@@ -683,86 +683,58 @@ document.addEventListener("DOMContentLoaded", () => {
                 evento.preventDefault();
 
                 /*
-                 * El grupo se abre SIEMPRE primero.
-                 * Esto permite que una persona nueva pueda:
-                 * - abrir WhatsApp aunque no lo tuviera abierto;
-                 * - iniciar sesión en WhatsApp Web si es necesario;
-                 * - ver la invitación y unirse al grupo si todavía no pertenece.
-                 *
-                 * Se abre inmediatamente porque los navegadores pueden
-                 * bloquear ventanas creadas después de un await().
+                 * Abrimos primero el enlace de invitación.
+                 * Si la persona ya está dentro, WhatsApp la llevará
+                 * al grupo; si es nueva, podrá unirse.
                  */
-                const ventanaGrupo =
-                    window.open(
-                        linkGrupo,
-                        "_blank",
-                        "noopener"
-                    );
+                const ventanaGrupo = window.open(
+                    linkGrupo,
+                    "_blank",
+                    "noopener"
+                );
 
                 /*
-                 * Después intentamos compartir la imagen + "Yo"
-                 * mediante el panel nativo del dispositivo.
+                 * En dispositivos compatibles, abrimos inmediatamente
+                 * el selector nativo para compartir la FOTO + "Yo".
+                 * WhatsApp no permite elegir automáticamente un grupo
+                 * de invitación ni pulsar Enviar por la página.
                  */
                 const compartidoDirecto =
-                    await compartirPrendaPorWhatsapp(
-                        imagenURL
-                    );
+                    await compartirPrendaPorWhatsapp(imagenURL);
 
                 if (compartidoDirecto) {
                     mostrarAvisoCopiado();
                     return;
                 }
 
-                /*
-                 * Si el navegador no permite compartir directamente:
-                 * 1. Copiamos "Yo".
-                 * 2. Abrimos la imagen para guardarla.
-                 * 3. El grupo ya quedó abierto.
-                 */
+                /* Plan B para navegadores que no soportan Web Share */
                 try {
-
-                    await navigator.clipboard.writeText(
-                        "Yo"
-                    );
-
+                    await navigator.clipboard.writeText("Yo");
                 } catch (error) {
-
-                    console.error(
-                        "No se pudo copiar el mensaje:",
-                        error
-                    );
-
+                    console.error("No se pudo copiar el mensaje:", error);
                 }
 
                 if (imagenURL) {
-
                     window.open(
                         imagenURL,
                         "_blank",
                         "noopener"
                     );
-
                 }
 
-                /*
-                 * Si el navegador bloqueó la primera ventana,
-                 * intentamos abrir el grupo nuevamente.
-                 */
+                /* Si el navegador bloqueó la primera ventana, reintentamos. */
                 if (!ventanaGrupo || ventanaGrupo.closed) {
-
                     window.open(
                         linkGrupo,
                         "_blank",
                         "noopener"
                     );
-
                 }
 
                 mostrarAvisoCopiado();
 
             }
         );
-
 
         whatsapp.innerHTML =
             `<i class="bi bi-whatsapp"></i> YO`;
