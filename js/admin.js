@@ -415,6 +415,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
                         </button>
 
+
+                        <button
+                            class="btn-tabla btn-compartir"
+                            data-compartir="${producto.id}"
+                            title="Compartir"
+                        >
+
+                            <i class="bi bi-share"></i>
+
+                        </button>
+
                     </div>
 
                 </td>
@@ -564,6 +575,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
         document
+            .querySelectorAll("[data-compartir]")
+            .forEach(boton => {
+
+                boton.addEventListener(
+                    "click",
+                    () => {
+
+                        const id =
+                            Number(
+                                boton.dataset.compartir
+                            );
+
+                        compartirProductoAdmin(id);
+
+                    }
+                );
+
+            });
+
+
+        document
             .querySelectorAll("[data-eliminar]")
             .forEach(boton => {
 
@@ -592,6 +624,212 @@ document.addEventListener("DOMContentLoaded", () => {
 
     }
 
+
+
+    /* ==========================================
+       COMPARTIR DESDE ADMINISTRACIÓN
+    ========================================== */
+
+    async function compartirImagenAdmin(imagenURL) {
+
+        if (
+            !imagenURL ||
+            !navigator.share ||
+            !navigator.canShare
+        ) {
+            return false;
+        }
+
+        try {
+
+            const respuesta = await fetch(imagenURL);
+            const blobImagen = await respuesta.blob();
+
+            const extension =
+                (blobImagen.type.split("/")[1] || "jpg")
+                    .split("+")[0];
+
+            const archivoImagen =
+                new File(
+                    [blobImagen],
+                    `prenda.${extension}`,
+                    { type: blobImagen.type }
+                );
+
+            if (!navigator.canShare({ files: [archivoImagen] })) {
+                return false;
+            }
+
+            await navigator.share({
+                files: [archivoImagen],
+                text: "Yo"
+            });
+
+            return true;
+
+        } catch (error) {
+
+            if (error && error.name === "AbortError") {
+                return true;
+            }
+
+            console.error(
+                "No se pudo compartir la imagen:",
+                error
+            );
+
+            return false;
+        }
+    }
+
+
+    function mostrarOpcionesCompartirAdmin(imagenURL) {
+
+        const modalAnterior =
+            document.getElementById(
+                "modalOpcionesCompartirAdmin"
+            );
+
+        if (modalAnterior) {
+            modalAnterior.remove();
+        }
+
+        const modal = document.createElement("div");
+        modal.id = "modalOpcionesCompartirAdmin";
+
+        modal.innerHTML = `
+            <div class="modal-compartir-admin-overlay">
+                <div
+                    class="modal-compartir-admin-contenido"
+                    role="dialog"
+                    aria-modal="true"
+                >
+
+                    <button
+                        type="button"
+                        class="modal-compartir-admin-cerrar"
+                        id="cerrarCompartirAdmin"
+                        aria-label="Cerrar"
+                    >×</button>
+
+                    <h3>Compartir prenda</h3>
+
+                    <p>
+                        Selecciona cómo quieres compartir la foto
+                        de esta prenda con el mensaje <strong>“Yo”</strong>.
+                    </p>
+
+                    <div class="modal-compartir-admin-botones">
+
+                        <button
+                            type="button"
+                            id="btnCompartirAdmin"
+                            class="opcion-compartir-admin"
+                        >
+                            📤 Compartir foto + “Yo”
+                        </button>
+
+                        <button
+                            type="button"
+                            id="btnCopiarYoAdmin"
+                            class="opcion-copiar-admin"
+                        >
+                            📋 Copiar “Yo”
+                        </button>
+
+                        <button
+                            type="button"
+                            id="btnAbrirFotoAdmin"
+                            class="opcion-foto-admin"
+                        >
+                            🖼️ Abrir foto de la prenda
+                        </button>
+
+                    </div>
+
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        const cerrar = () => modal.remove();
+
+        document
+            .getElementById("cerrarCompartirAdmin")
+            .addEventListener("click", cerrar);
+
+        document
+            .getElementById("btnCompartirAdmin")
+            .addEventListener("click", async () => {
+
+                const compartido =
+                    await compartirImagenAdmin(imagenURL);
+
+                if (!compartido) {
+
+                    try {
+                        await navigator.clipboard.writeText("Yo");
+                        alert(
+                            "Se copió “Yo”. Ahora abre WhatsApp y adjunta la foto de la prenda."
+                        );
+                    } catch (error) {
+                        alert(
+                            "No se pudo abrir el compartir automático. Usa “Copiar Yo” y después adjunta la foto."
+                        );
+                    }
+                }
+            });
+
+        document
+            .getElementById("btnCopiarYoAdmin")
+            .addEventListener("click", async () => {
+
+                try {
+                    await navigator.clipboard.writeText("Yo");
+                    alert("Se copió “Yo” al portapapeles.");
+                } catch (error) {
+                    alert(
+                        "No se pudo copiar automáticamente. Copia el texto “Yo” manualmente."
+                    );
+                }
+            });
+
+        document
+            .getElementById("btnAbrirFotoAdmin")
+            .addEventListener("click", () => {
+
+                if (imagenURL) {
+                    window.open(
+                        imagenURL,
+                        "_blank",
+                        "noopener"
+                    );
+                }
+            });
+    }
+
+
+    function compartirProductoAdmin(id) {
+
+        const producto =
+            productos.find(
+                p => Number(p.id) === id
+            );
+
+        if (!producto) return;
+
+        const imagenURL = producto.foto
+            ? `/.netlify/functions/imagen?key=${encodeURIComponent(producto.foto)}`
+            : "";
+
+        if (!imagenURL) {
+            alert("Esta prenda no tiene una foto disponible para compartir.");
+            return;
+        }
+
+        mostrarOpcionesCompartirAdmin(imagenURL);
+    }
 
 
     /* ==========================================
@@ -1153,5 +1391,93 @@ document.addEventListener("DOMContentLoaded", () => {
     ========================================== */
 
     cargarProductos();
+
+
+
+    /* Estilos del modal de compartir de administración */
+    if (!document.getElementById("estilosModalCompartirAdmin")) {
+
+        const estilos = document.createElement("style");
+        estilos.id = "estilosModalCompartirAdmin";
+        estilos.textContent = `
+            .modal-compartir-admin-overlay {
+                position: fixed;
+                inset: 0;
+                z-index: 99999;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 20px;
+                background: rgba(0, 0, 0, 0.55);
+            }
+
+            .modal-compartir-admin-contenido {
+                position: relative;
+                width: min(460px, 100%);
+                padding: 30px 24px 24px;
+                border-radius: 18px;
+                background: #fff;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+                text-align: center;
+            }
+
+            .modal-compartir-admin-contenido h3 {
+                margin: 0 0 10px;
+            }
+
+            .modal-compartir-admin-contenido p {
+                margin: 0 0 22px;
+                line-height: 1.5;
+            }
+
+            .modal-compartir-admin-cerrar {
+                position: absolute;
+                top: 10px;
+                right: 14px;
+                border: 0;
+                background: transparent;
+                font-size: 30px;
+                line-height: 1;
+                cursor: pointer;
+            }
+
+            .modal-compartir-admin-botones {
+                display: grid;
+                gap: 10px;
+            }
+
+            .modal-compartir-admin-botones button {
+                width: 100%;
+                padding: 13px 16px;
+                border: 0;
+                border-radius: 10px;
+                cursor: pointer;
+                font-size: 15px;
+                font-weight: 600;
+            }
+
+            .opcion-compartir-admin {
+                background: #25d366;
+                color: #fff;
+            }
+
+            .opcion-copiar-admin {
+                background: #f1f1f1;
+                color: #222;
+            }
+
+            .opcion-foto-admin {
+                background: #eee;
+                color: #222;
+            }
+
+            .btn-compartir {
+                border: 0;
+                cursor: pointer;
+            }
+        `;
+
+        document.head.appendChild(estilos);
+    }
 
 });
