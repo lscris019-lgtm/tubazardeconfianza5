@@ -653,14 +653,14 @@ function mostrarOpcionesPrenda(imagenURL) {
                 </p>
 
                 <p class="modal-opciones-aviso">
-                    Aún no te unes al grupo: primero ingresa al grupo, regresa a la página
-                    y después da en <strong>Compartir foto + Yo</strong>.
+                    Si eres nueva: primero ingresa al grupo de WhatsApp, regresa a esta página
+                    y después selecciona <strong>Compartir foto + “Yo”</strong>.
                 </p>
 
                 <div class="modal-opciones-botones">
 
                     <button type="button" id="btnIngresarGrupo" class="opcion-grupo">
-                        Ingresar al grupo de WhatsApp
+                        Soy nueva, ingresar al grupo y regresar
                     </button>
 
                     <button type="button" id="btnCompartirPrenda" class="opcion-compartir">
