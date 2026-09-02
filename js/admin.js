@@ -630,7 +630,7 @@ document.addEventListener("DOMContentLoaded", () => {
        COMPARTIR DESDE ADMINISTRACIÓN
     ========================================== */
 
-    async function compartirImagenAdmin(imagenURL) {
+    async function compartirImagenAdmin(imagenURL, textoCompartir) {
 
         if (
             !imagenURL ||
@@ -662,7 +662,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             await navigator.share({
                 files: [archivoImagen],
-                text: "Yo"
+                text: textoCompartir
             });
 
             return true;
@@ -683,7 +683,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    function mostrarOpcionesCompartirAdmin(imagenURL) {
+    function mostrarOpcionesCompartirAdmin(imagenURL, textoCompartir) {
 
         const modalAnterior =
             document.getElementById(
@@ -716,7 +716,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                     <p>
                         Selecciona cómo quieres compartir la foto
-                        de esta prenda con el mensaje <strong>“Yo”</strong>.
+                        de esta prenda con su categoría, descripción y precio.
                     </p>
 
                     <div class="modal-compartir-admin-botones">
@@ -726,15 +726,15 @@ document.addEventListener("DOMContentLoaded", () => {
                             id="btnCompartirAdmin"
                             class="opcion-compartir-admin"
                         >
-                            📤 Compartir foto + “Yo”
+                            📤 Compartir foto + información
                         </button>
 
                         <button
                             type="button"
-                            id="btnCopiarYoAdmin"
+                            id="btnCopiarInfoAdmin"
                             class="opcion-copiar-admin"
                         >
-                            📋 Copiar “Yo”
+                            📋 Copiar categoría, descripción y precio
                         </button>
 
                         <button
@@ -755,6 +755,35 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const cerrar = () => modal.remove();
 
+        // Cargar SweetAlert2 si todavía no está disponible
+        const cargarSweetAlert = () => new Promise((resolve, reject) => {
+            if (window.Swal) {
+                resolve(window.Swal);
+                return;
+            }
+
+            const script = document.createElement("script");
+            script.src = "https://cdn.jsdelivr.net/npm/sweetalert2@11";
+            script.onload = () => resolve(window.Swal);
+            script.onerror = reject;
+            document.head.appendChild(script);
+        });
+
+        const mostrarSweetAlert = async (icon, title, text) => {
+            try {
+                const Swal = await cargarSweetAlert();
+                Swal.fire({
+                    icon,
+                    title,
+                    text,
+                    confirmButtonText: "Aceptar",
+                    confirmButtonColor: "#198754"
+                });
+            } catch (error) {
+                console.error("No se pudo cargar SweetAlert2:", error);
+            }
+        };
+
         document
             .getElementById("cerrarCompartirAdmin")
             .addEventListener("click", cerrar);
@@ -764,33 +793,37 @@ document.addEventListener("DOMContentLoaded", () => {
             .addEventListener("click", async () => {
 
                 const compartido =
-                    await compartirImagenAdmin(imagenURL);
+                    await compartirImagenAdmin(imagenURL, textoCompartir);
 
                 if (!compartido) {
 
                     try {
-                        await navigator.clipboard.writeText("Yo");
-                        alert(
-                            "Se copió “Yo”. Ahora abre WhatsApp y adjunta la foto de la prenda."
+                        await navigator.clipboard.writeText(textoCompartir);
+                        mostrarSweetAlert(
+                            "success",
+                            "¡Información copiada!",
+                            "La categoría, descripción y precio se copiaron al portapapeles. Ahora puedes abrir WhatsApp y adjuntar la foto."
                         );
                     } catch (error) {
                         alert(
-                            "No se pudo abrir el compartir automático. Usa “Copiar Yo” y después adjunta la foto."
+                            "No se pudo abrir el compartir automático. Usa “Copiar información” y después adjunta la foto."
                         );
                     }
                 }
             });
 
         document
-            .getElementById("btnCopiarYoAdmin")
+            .getElementById("btnCopiarInfoAdmin")
             .addEventListener("click", async () => {
 
                 try {
-                    await navigator.clipboard.writeText("Yo");
-                    alert("Se copió “Yo” al portapapeles.");
+                    await navigator.clipboard.writeText(textoCompartir);
+                    alert("Se copió la categoría, descripción y precio al portapapeles.");
                 } catch (error) {
-                    alert(
-                        "No se pudo copiar automáticamente. Copia el texto “Yo” manualmente."
+                    mostrarSweetAlert(
+                        "error",
+                        "No se pudo copiar",
+                        "No fue posible copiar automáticamente la categoría, descripción y precio."
                     );
                 }
             });
@@ -823,12 +856,17 @@ document.addEventListener("DOMContentLoaded", () => {
             ? `/.netlify/functions/imagen?key=${encodeURIComponent(producto.foto)}`
             : "";
 
+        const textoCompartir =
+            `Categoría: ${producto.categoria || "Sin categoría"}\n` +
+            `Descripción: ${producto.descripcion || "Sin descripción"}\n` +
+            `Precio: $${producto.precio != null ? producto.precio : "0.00"}`;
+
         if (!imagenURL) {
             alert("Esta prenda no tiene una foto disponible para compartir.");
             return;
         }
 
-        mostrarOpcionesCompartirAdmin(imagenURL);
+        mostrarOpcionesCompartirAdmin(imagenURL, textoCompartir);
     }
 
 
